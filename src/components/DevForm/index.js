@@ -2,14 +2,45 @@ import React from 'react';
 
 import './styles.css';
 
-const DevForm = () => {
+const DevForm = ({ onSubmit }) => {
   const [latitude, setLatitude] = React.useState('');
   const [longitude, setLogitude] = React.useState('');
   const [githubUsername, setGithubUsername] = React.useState('');
   const [skils, setSkils] = React.useState('');
 
+  React.useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+
+        setLatitude(latitude);
+        setLogitude(longitude);
+      },
+      (err) => {
+        console.log(err);
+      },
+      {
+        timeout: 30000,
+      }
+    );
+  }, []);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+
+    await onSubmit({
+      github_username: githubUsername,
+      skils,
+      latitude,
+      longitude
+    });
+
+    setGithubUsername('');
+    setSkils('');
+  }
+
   return (
-    <form onSubmit={handleAddDev}>
+    <form onSubmit={handleSubmit}>
       <div className="input-block">
         <label htmlFor="github_username">Usuário do Github</label>
         <input 
